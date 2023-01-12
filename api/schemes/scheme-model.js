@@ -18,7 +18,6 @@ function find() { // EXERCISE A
     Return from this function the resulting dataset.
   */
  return db.select('sc.*')
-
  .from('schemes as sc')
  .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
  .groupBy('sc.scheme_id')
@@ -26,10 +25,15 @@ function find() { // EXERCISE A
  .count('st.step_id as number_of_steps' )
 }
 
-function findById(scheme_id) { // EXERCISE B
+async function findById(scheme_id) { // EXERCISE B
   /*
     1B- Study the SQL query below running it in SQLite Studio against `data/schemes.db3`:
 
+return db.select('sc.scheme_name', st.*)
+.from('schemes as sc')
+.leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+.where('sc.scheme_id = scheme_id)
+.orderBy('st.step_number', 'asc')
       SELECT
           sc.scheme_name,
           st.*
@@ -92,7 +96,28 @@ function findById(scheme_id) { // EXERCISE B
         "steps": []
       }
   */
+  const scheme = await db.select('sc.scheme_name', 'st.*', 'sc.scheme_id')
+    .from('schemes as sc')
+    .leftJoin('steps as st', 'sc.scheme_id', 'st.scheme_id')
+    .where('sc.scheme_id', `${scheme_id}`)
+    .orderBy('st.step_number', 'asc')
+
+  // let result = {
+  //   scheme_id: scheme[0].scheme_id ? scheme[0].scheme_id : 'none',
+  //   scheme_name: scheme[0].scheme_name,
+  //   steps: []
+  // }
+
+  let result = scheme.reduce((acc, currentVal) => {
+    if(currentVal.instructions) {
+    acc.steps.push({step_id: currentVal.step_id, step_number: currentVal.step_number, instructions: currentVal.instructions})
+    }
+    return acc
+  }, { scheme_id: scheme[0].scheme_id, scheme_name: scheme[0].scheme_name, steps: []})
+
+    return result
 }
+
 
 function findSteps(scheme_id) { // EXERCISE C
   /*
