@@ -36,7 +36,7 @@ const checkSchemeId = async (req, res, next) => {
 */
 const validateScheme = (req, res, next) => {
   const { scheme_name } = req.body;
-  if(!scheme_name || scheme_name.trim() === '' || typeof scheme_name !== 'string') {
+  if(!scheme_name || scheme_name === '' || typeof scheme_name !== 'string') {
     next(res.status(400).json({ "message": "invalid scheme_name" }))
   } else {
     next()
